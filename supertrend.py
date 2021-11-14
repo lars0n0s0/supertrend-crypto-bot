@@ -11,7 +11,7 @@ import numpy as np
 from datetime import datetime
 import time
 
-exchange = ccxt.binanceus({
+exchange = ccxt.binance({
     "apiKey": config.BINANCE_API_KEY,
     "secret": config.BINANCE_SECRET_KEY
 })
