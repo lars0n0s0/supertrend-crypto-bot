@@ -97,10 +97,6 @@ def run_bot():
     supertrend_data = supertrend(df)
     
     check_buy_sell_signals(supertrend_data)
-    
-    del supertrend_data
-    del check_buy_sell_signals
-    gc.collect()
 
 
 schedule.every(5).seconds.do(run_bot)
