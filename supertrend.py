@@ -69,18 +69,20 @@ def check_buy_sell_signals(df):
     previous_row_index = last_row_index - 1
 
     if not df['in_uptrend'][previous_row_index] and df['in_uptrend'][last_row_index]:
+        availUSDT = exchange.fetch_balance()['USDT']['free']
         print("changed to uptrend, buy")
         if not in_position:
-            order = exchange.create_market_buy_order('ETH/USD', 0.05)
+            order = exchange.create_market_buy_order('ETH/USD', availUSDT)
             print(order)
             in_position = True
         else:
             print("already in position, nothing to do")
     
     if df['in_uptrend'][previous_row_index] and not df['in_uptrend'][last_row_index]:
+        availETH = exchange.fetch_balance()['ETH']['free']
         if in_position:
             print("changed to downtrend, sell")
-            order = exchange.create_market_sell_order('ETH/USD', 0.05)
+            order = exchange.create_market_sell_order('ETH/USD', availETH)
             print(order)
             in_position = False
         else:
@@ -88,16 +90,20 @@ def check_buy_sell_signals(df):
 
 def run_bot():
     print(f"Fetching new bars for {datetime.now().isoformat()}")
-    bars = exchange.fetch_ohlcv('ETH/USDT', timeframe='1m', limit=100)
+    bars = exchange.fetch_ohlcv('ETH/USDT', timeframe='5m', limit=50)
     df = pd.DataFrame(bars[:-1], columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
     supertrend_data = supertrend(df)
     
     check_buy_sell_signals(supertrend_data)
+    
+    del supertrend_data
+    del check_buy_sell_signals
+    gc.collect()
 
 
-schedule.every(10).seconds.do(run_bot)
+schedule.every(5).seconds.do(run_bot)
 
 
 while True:
